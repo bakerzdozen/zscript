@@ -1,0 +1,71 @@
+// Ignore this comment
+
+test = ["Hello", "World", 32]
+output(type(test))
+message = test[0] + " " + test[1]
+
+output(size(message));
+output(size(test));
+output(size("Hello World"))
+output(message);
+output(size(test[1]));
+c = (2 * (7 + 2) / (6 - 2));
+i = 0
+
+multiply (a, b) {
+    output("Run " + (i + 1))
+    if (i == 0) {
+        i = i + 1;
+        return(a * b)
+    } else {
+        return (a + b)
+    }
+}
+
+output(type(c) != type(1.33));
+output(c);
+output(multiply(67, 67));
+output(multiply(c, 3));
+output("Here");
+output(4 - (1 * 3) - 2);
+output(3.6 * (10 / 110));
+
+a = c * 5
+b = size("hello Isaac")
+output(a)
+output(b);
+output(b <= 0);
+output("Start if");
+
+if (b < 0) {
+    output("One");
+    b = 17;
+    output("Changed b");
+} else if (b == a) {
+    output("Two");
+} else if (b > a) {
+    output("Three");
+} else if (b == 0) {
+    output("Four");
+} else {
+    output("Five");
+}
+
+output("Finished if");
+
+i = 0;
+
+output("Start while") 
+while (i < 10) {
+    output(i + 1);
+    i = i + 1;
+}
+
+output("Finished while");
+
+output("Please enter your name:");
+
+name = input();
+// name = "Test"
+
+output("Your name is: " + name);

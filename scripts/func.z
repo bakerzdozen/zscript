@@ -1,0 +1,11 @@
+a = 4 * 3;
+output((a != (3)))
+output(type(a) != type(3));
+
+string = ""
+
+while(string != "exit") {
+    output("Enter something:")
+    string = input()
+    output("You typed: " + string)
+}
