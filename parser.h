@@ -23,5 +23,7 @@ script_int count_until(Script_t* script, const char count_c, const char end_c);
 script_int jump_to_pos(Script_t* script, uint32_t pos);
 script_int parse_name(Script_t* script, char* name_out);
 script_int get_line_number(Script_t* script);
+script_int print_line(Script_t* script, int ln);
+void print_n_chars(char c, script_int len);
 
 #endif  // ZSCRIPT_PARSER_H

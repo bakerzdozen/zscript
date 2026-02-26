@@ -21,53 +21,74 @@ script_int script_return(Element_t* main_element);
 
 void s_print(int ln, script_int ret)
 {
-    static bool printed = false;
-    if (!printed) {
-        printf("\x1b[1;31m");
-        printf("Error at line %u\n", ln);
-        printf("\x1b[0m");
-        printf("\x1b[31m");
-
-        switch (ret) {
-            case SCRIPT_ERR_NO_VAR:
-                printf("Tried to use a variable which was not declared\n");
-                break;
-            case SCRIPT_ERR_FORMAT:
-                printf("Formatting error\n");
-                break;
-            case SCRIPT_ERR_INCOMPATIBLE_OP:
-                printf("Incompatible operand for the given type/s\n");
-                break;
-            case SCRIPT_ERR_PARSE:
-                printf("Parsing error\n");
-                break;
-            case SCRIPT_ERR_LIST:
-                printf("List error\n");
-                break;
-            case SCRIPT_ERR_TOO_MANY_ELEMENTS:
-                printf("Too many elements in function call\n");
-                break;
-            case SCRIPT_ERR_NAME_TOO_LONG:
-                printf("Element name too long. Please keep it less than %u characters\n", DEFAULT_BUFF_SIZE);
-                break;
-            case SCRIPT_ERR_NO_FILE:
-                printf("No file found\n");
-                break;
-            default:
-                break;
-        }
-        
-        printf("\x1b[0m");
+    switch (ret) {
+        case SCRIPT_ERR_NO_VAR:
+            printf("Tried to use a variable which was not declared\n");
+            break;
+        case SCRIPT_ERR_FORMAT:
+            printf("Formatting error\n");
+            break;
+        case SCRIPT_ERR_INCOMPATIBLE_OP:
+            printf("Incompatible operand for the given type/s\n");
+            break;
+        case SCRIPT_ERR_PARSE:
+            printf("Parsing error\n");
+            break;
+        case SCRIPT_ERR_LIST:
+            printf("List error\n");
+            break;
+        case SCRIPT_ERR_TOO_MANY_ELEMENTS:
+            printf("Too many elements in function call\n");
+            break;
+        case SCRIPT_ERR_NAME_TOO_LONG:
+            printf("Element name too long. Please keep it less than %u characters\n", DEFAULT_BUFF_SIZE);
+            break;
+        case SCRIPT_ERR_NO_FILE:
+            printf("No file found\n");
+            break;
+        default:
+            break;
     }
-    printed = true;
+}
+
+script_int print_error(script_int err_type, Script_t* script)
+{
+    static bool displayed = false;
+
+    if (displayed || (err_type >= 0)) {
+        return err_type;
+    }
+
+    int line_no = get_line_number(script);
+        
+    if (line_no <= 0) {
+        return err_type;
+    }
+
+    printf("\x1b[1;31m");
+    printf("Error at line %u\n", line_no);
+    printf("\x1b[0m");
+    printf("\x1b[31m");
+
+    int line_len = print_line(script, line_no);
+    
+    print_n_chars('^', line_len);
+
+    putchar('\n');
+    
+    s_print(line_no, err_type);
+    
+    printf("\x1b[0m");
+
+    displayed = true;
+
+    return err_type;
 }
 
 #ifdef PRINTOUT
-#define SCRIPT_RETURN(x, script)        do {if (x < 0) {\
-    s_print(get_line_number(script), x);} \
-    return x;} while(0);
+#define SCRIPT_RETURN(x, script)    return print_error(x, script);
 #else
-#define SCRIPT_RETURN(x, _)        return x;
+#define SCRIPT_RETURN(x, _)         return x;
 #endif
 
 Element_t global_variable_dict[DEFAULT_BUFF_SIZE] = {
@@ -93,8 +114,8 @@ Element_t function_dict[DEFAULT_BUFF_SIZE] = {
     {
         .name = "output",
         .data.ptr = script_print,
-        .size = 1,          // (Number of input args & 0xF) | (Number of output args << 4)
-        .id = FUNC_BUILTIN  // builtin funcs use .data for pointer. Custom funcs use data for position in file
+        .size = (1 & 0xF) | (1 << 4),   // (Number of input args & 0xF) | (Number of output args << 4)
+        .id = FUNC_BUILTIN              // builtin funcs use .data for pointer. Custom funcs use data for position in file
     },
     {
         .name = "size",
@@ -1065,8 +1086,14 @@ script_int get_element(Element_t* main_element, Element_t* out, char in_brackets
                         if (!in_brackets) {
                             SCRIPT_RETURN(SCRIPT_ERR_FORMAT, (Script_t*)main_element->data.ptr);
                         }
+                        all_elements[count++] = current_element;
+                        goto calculate;
                     case '\n':
                     case ';':
+                        if (in_brackets) {
+                            SCRIPT_RETURN(SCRIPT_ERR_FORMAT, (Script_t*)main_element->data.ptr);
+                        }
+                        
                         all_elements[count++] = current_element;
                         goto calculate;
                     case '+':
@@ -1693,9 +1720,10 @@ script_int main(script_int argc, char * argv[]) {
     char* script_path = NULL;
     if (argc < 2) {
         // No arguments given
-        printf("Error - No file provided\n\n");
-        printf("Usage: %s [filepath]\n", argv[0]);
-        return 1;
+        // printf("Error - No file provided\n\n");
+        // printf("Usage: %s [filepath]\n", argv[0]);
+        // return 1;
+        script_path = "scripts/test.z";
     } else {
         script_path = argv[1];
     }

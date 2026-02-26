@@ -320,7 +320,7 @@ script_int get_line_number(Script_t* script)
 
     script_int current_pos = get_file_pos(script);
 
-    if (current_pos < 0) {
+    if (current_pos-- < 0) {
         return -1;
     }
 
@@ -329,6 +329,7 @@ script_int get_line_number(Script_t* script)
 
     jump_to_pos(script, 0);
 
+    // If we end on '\n', we do not count that as a new line
     for (script_int i = 0; i < current_pos; i++) {
         c = fgetc((FILE*)script);
         if (c <= '\0') {
@@ -339,4 +340,65 @@ script_int get_line_number(Script_t* script)
         }
     }
     return line_no;
+}
+
+script_int print_line(Script_t* script, int ln)
+{
+    if (ln <= 0) {
+        return -1;
+    }
+
+    int c = 0;
+    int line_no = 1;
+
+    jump_to_pos(script, 0);
+
+    while (line_no < ln)
+    {
+        c = fgetc((FILE*)script);
+
+        if (c <= 0) {
+            return -1;
+        }
+        if (c == '\n') {
+            ++line_no;
+        }
+    }
+
+    c = fgetc((FILE*)script);
+
+    int len = 0;
+
+    while (c > 0) {
+        // printf("Val: %c | len: %u\n", c, len);
+        if (c == '\n') {
+            len--;
+            break;
+        }
+
+        putchar(c);
+        
+        c = fgetc((FILE*)script);
+        len++;
+    }
+
+    if (len) {
+        putchar('\n');
+    }
+
+    fflush(stdout);
+
+    return len;
+}
+
+void print_n_chars(char c, script_int len)
+{
+    if (len < 0) {
+        return;
+    }
+    
+    while (len--) {
+        putchar(c);
+    }
+    fflush(stdout);
 }
