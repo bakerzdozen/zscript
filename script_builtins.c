@@ -24,28 +24,57 @@ static char* get_type_str(VarType_t type)
     }
 }
 
-// TODO: Make it a loop which prints more until reach number of args
-script_int script_print(Args_t* args)
+static script_int print_element(const Element_t* element)
 {
-    switch (args->input_args[0].id & (0x7)) {
+    switch (element->id & (0x7)) {
         case SCRIPT_TYPE_BOOL:
-            printf("%s", (args->input_args[0].data.num_i == 0) ? "False" : "True");
+            printf("%s", (element->data.num_i == 0) ? "False" : "True");
             break;
         case SCRIPT_TYPE_INT:
-            printf("%i", args->input_args[0].data.num_i);
+            printf("%i", element->data.num_i);
             break;
         case SCRIPT_TYPE_FLOAT:
-            printf("%f", args->input_args[0].data.num_f);
+            printf("%f", element->data.num_f);
             break;
         case SCRIPT_TYPE_STRING:
-            printf("%s", (char*)args->input_args[0].data.ptr);
+            printf("%s", (char*)element->data.ptr);
             break;
         case SCRIPT_TYPE_TYPE:
-            printf("%s", get_type_str(args->input_args[0].data.num_i));
+            printf("%s", get_type_str(element->data.num_i));
+            break;
+        case SCRIPT_TYPE_LIST:
+            script_int i;
+            
+            Element_t* list = (Element_t*)element->data.ptr;
+            
+            putchar('[');
+
+            for (i = 0; i < (element->size - 1); i++) {
+                print_element(&list[i]);
+                putchar(',');
+            }
+            
+            if (i < element->size) {
+                print_element(&list[i]);
+            }
+
+            putchar(']');
             break;
         default:
             return -1;
     }
+
+    return SCRIPT_OK;
+}
+
+script_int script_print(Args_t* args)
+{
+    script_int ret = print_element(&args->input_args[0]);
+    
+    if (ret != SCRIPT_OK) {
+        return ret;
+    }
+
     printf("\n");
     return 0;
 }

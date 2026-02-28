@@ -1,5 +1,9 @@
-#include "parser.h"
+#include "script_parser.h"
 #include <string.h>
+#include <stdio.h>
+
+#define ZSCRIPT_EXTN    "z"
+#define MAX_EXTN_LEN    8
 
 struct _script {
     FILE* file;
@@ -7,6 +11,30 @@ struct _script {
 
 Script_t* open_script(const char* path) 
 {
+    // Check it is a valid .z script
+    const char* p = path;
+
+    char extn[MAX_EXTN_LEN + 1];
+    script_int extn_indx = -1;
+
+    while(*p) {
+        if (*p == '.') {
+            extn_indx = 0;
+        } else if (extn_indx >= 0) {
+            extn[extn_indx++] = *p;
+            if (extn_indx >= MAX_EXTN_LEN) {
+                printf("Error - file extension length too long\n");
+                return NULL;
+            }
+        }
+        p++;
+    }
+
+    if (strncmp(extn, ZSCRIPT_EXTN, MAX_EXTN_LEN) != 0) {
+        printf("Error - file extension invalid\n");
+        return NULL;
+    }
+
     return (Script_t*)fopen(path, "rb");
 }
 

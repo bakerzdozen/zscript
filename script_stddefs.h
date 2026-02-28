@@ -3,14 +3,14 @@
 
 #include <stdint.h>
 
-#define FUNC_INVALID        0
-#define FUNC_BUILTIN        1
-#define FUNC_CUSTOM         2
+#define FUNC_INVALID            0
+#define FUNC_BUILTIN            1
+#define FUNC_CUSTOM             2
 
-#define SCRIPT_TRUE         1
-#define SCRIPT_FALSE        0
+#define SCRIPT_TRUE             1
+#define SCRIPT_FALSE            0
 
-#define DEFAULT_BUFF_SIZE   16
+#define DEFAULT_BUFF_SIZE       16
 
 typedef struct _script Script_t;
 
