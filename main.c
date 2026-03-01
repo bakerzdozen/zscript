@@ -294,7 +294,26 @@ Element_t* add_to_string(Element_t* string_element, Element_t* element_2)
             break;
         case SCRIPT_TYPE_LIST:
             // TODO: Loop through list doing this function
-            return NULL; 
+            res->size++;
+            res->data.ptr = calloc(res->size, sizeof(char));
+            char* str_ptr = (char*)res->data.ptr;
+            snprintf((char*)str_ptr, res->size, "%s[", (char*)string_element->data.ptr);
+            script_int list_indx;
+            Element_t* list = (Element_t*)element_2->data.ptr;
+            for (list_indx = 0; list_indx < (element_2->size - 1); list_indx++) {
+                res = add_to_string(res, &list[list_indx]);
+                free(str_ptr);
+                str_ptr = realloc(res->data.ptr, ++res->size);
+                str_ptr[res->size - 2] = ',';
+            }
+            
+            if (list_indx < res->size) {
+                res = add_to_string(res, &list[list_indx]);
+                free(str_ptr);
+                str_ptr = realloc(res->data.ptr, ++res->size);
+                str_ptr[res->size - 2] = ']';
+            }
+            break;
     }
     res->size -= 1; // Remove null terminator from size count
     return res;

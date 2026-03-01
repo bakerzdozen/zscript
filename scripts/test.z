@@ -3,6 +3,9 @@
 test = ["Hello", "World", 32]
 output(type(test))
 output(test)
+list_test = "List: " + test
+output(list_test)
+output(size(list_test))
 message = test[0] + " " + test[1]
 
 output(size(message));
