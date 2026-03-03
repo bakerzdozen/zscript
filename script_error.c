@@ -1,10 +1,11 @@
-#include "script_stddefs.h"
 #include "script_error.h"
 #include "script_parser.h"
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdarg.h>
 
-static void display_error(script_int ln, script_int ret)
+static void display_script_error(script_int ln, script_int ret)
 {
     switch (ret) {
         case SCRIPT_ERR_NO_VAR:
@@ -36,7 +37,7 @@ static void display_error(script_int ln, script_int ret)
     }
 }
 
-script_int print_error(script_int err_type, Script_t* script)
+script_int print_script_error(script_int err_type, Script_t* script)
 {
     static bool displayed = false;
 
@@ -61,11 +62,28 @@ script_int print_error(script_int err_type, Script_t* script)
 
     putchar('\n');
     
-    display_error(line_no, err_type);
+    display_script_error(line_no, err_type);
     
     printf("\x1b[0m");
 
     displayed = true;
 
     return err_type;
+}
+
+void print_general_error(const char* fmt, ...)
+{
+    if ((fmt == NULL) || (strlen(fmt) == 0)) {
+        printf("Error");
+        return;
+    }
+
+    printf("Error - ");
+
+    va_list args;
+    va_start(args, fmt);
+
+    vprintf(fmt, args);    
+ 
+    va_end(args);
 }

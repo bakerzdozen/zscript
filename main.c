@@ -11,7 +11,8 @@
 #include "script_builtins.h"
 #include "script_stddefs.h"
 
-#define PRINTOUT
+#define ZSCRIPT_PRINTOUT
+#define ZSCRIPT_DEBUG
 
 script_int run(Script_t* file, script_int in_func);
 script_int script_if(Element_t* main_element);
@@ -20,8 +21,8 @@ script_int get_element(Element_t* main_element, Element_t* out, char in_brackets
 script_int function_statement(Element_t* main_element, Element_t** out);
 script_int script_return(Element_t* main_element);
 
-#ifdef PRINTOUT
-#define SCRIPT_RETURN(x, script)    return print_error(x, script);
+#ifdef ZSCRIPT_PRINTOUT
+#define SCRIPT_RETURN(x, script)    return print_script_error(x, script);
 #else
 #define SCRIPT_RETURN(x, _)         return x;
 #endif
@@ -1666,34 +1667,44 @@ script_int run(Script_t* file, script_int in_func) {
 
 script_int main(script_int argc, char * argv[]) {
     
-    // clock_t start, end;
-    // double cpu_time_used;
+    #ifdef ZSCRIPT_DEBUG
+        clock_t start, end;
+        double cpu_time_used;
 
-    // start = clock();
+        start = clock();
     
+    #endif
+
     char* script_path = NULL;
     if (argc < 2) {
         // No arguments given
-        // printf("Error - No file provided\n\n");
-        // printf("Usage: %s [filepath]\n", argv[0]);
-        // return 1;
-        script_path = "scripts/test.z";
+        #ifdef ZSCRIPT_DEBUG
+            script_path = "scripts/test.z";
+        #else
+            print_general_error("No file provided\n");
+            printf("\nUsage: %s [filepath]\n", argv[0]);
+            return 1;
+        #endif
     } else {
         script_path = argv[1];
     }
 
     Script_t* file = open_script(script_path);
     if (file == NULL) {
-        printf("Error - Could not open file %s\n", argv[1]);
+        print_general_error("Could not open file \"%s\"\n", argv[1]);
         SCRIPT_RETURN(SCRIPT_ERR_NO_FILE, file);
     }
     run(file, SCRIPT_FALSE);
 
-    // end = clock();
+    #ifdef ZSCRIPT_DEBUG
 
-    // cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
-    // double milliseconds = cpu_time_used * 1000.0;
+        end = clock();
 
-    // printf("Time elapsed: %.2f milliseconds\n", milliseconds);
+        cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+        double milliseconds = cpu_time_used * 1000.0;
+
+        printf("Time elapsed: %.2f milliseconds\n", milliseconds);
+
+    #endif
     return 0;
 }

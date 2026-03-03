@@ -1,4 +1,5 @@
 #include "script_parser.h"
+#include "script_error.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -23,7 +24,7 @@ Script_t* open_script(const char* path)
         } else if (extn_indx >= 0) {
             extn[extn_indx++] = *p;
             if (extn_indx >= MAX_EXTN_LEN) {
-                printf("Error - file extension length too long\n");
+                print_general_error("File extension length too long\n");
                 return NULL;
             }
         }
@@ -31,7 +32,7 @@ Script_t* open_script(const char* path)
     }
 
     if (strncmp(extn, ZSCRIPT_EXTN, MAX_EXTN_LEN) != 0) {
-        printf("Error - file extension invalid\n");
+        print_general_error("Error - file extension \"%s\" invalid\n", extn);
         return NULL;
     }
 
